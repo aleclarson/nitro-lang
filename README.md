@@ -1,4 +1,65 @@
-# nitro: balance of simple and practical
+# nitro-lang
+
+Enjoy a language that embraces: **simplicity, immutability, and reactivity**
+
+Nitro apps run anywhere by compiling to [WASM](https://webassembly.org/).
+
+- **File extension:** `.nt`
+- **Strongly typed?** Yes, with [type inference](https://en.wikipedia.org/wiki/Type_inference)
+- **Compiles to:** `.wasm`
+- **Inspired by:** [TypeScript][ts], JavaScript, [CoffeeScript][coffee], [Lua][lua], C, [Ghost][ghost]
+
+[coffee]: https://github.com/jashkenas/coffeescript
+[ghost]: https://github.com/jamiebuilds/ghost-lang
+[lua]: https://en.wikipedia.org/wiki/Lua_(programming_language)
+[ts]: https://github.com/Microsoft/TypeScript
+
+&nbsp;
+
+> ### ⚠️ **NITRO IS JUST A CONCEPT LANGUAGE.** Help us make it!
+
+&nbsp;
+
+### JSX in Nitro
+
+Since JSX is the new hotness, let's learn about JSX in Nitro before anything else. Even before comments! Why teach JSX in Nitro before all else? Because we believe Nitro is familiar enough for you to understand what you're about to see.
+
+Nitro's stdlib has JSX utilities built-in.
+
+```js
+import (render, useContext, ReactElement) from 'nitro-react'
+
+type Props = (id: string, items: ReactElement[])
+
+Foo = (props: Props, children) {
+  theme = useContext(ThemeProvider)
+
+  // Expressions must be wrapped with parens..
+  <div hidden id=(props.id)>
+    // ..except strings and comments
+    <h1 theme()>"Hello world"</h1>
+    // Here is an if expression!
+    (if children {
+      // The `theme()` part lets a function alter the props and introspect the component tree.
+      <p theme()>(children)</p>
+    })
+    // Here is a for..in expression!
+    (for (key, value) in props.items {
+      // The `:key` part sets the "key" prop to the `key` variable.
+      <div :key class="item" theme()>
+        // Ternary operator to the rescue.
+        (value ? <p>value</p> : null)
+      </div>
+    })
+  </div>
+}
+
+render(<Foo id="foo">Hello world</Foo>)
+```
+
+In the future, the stdlib will have useful primitives for creating your own React-like library. This will provide maximum interoperability between component-based frameworks.
+
+&nbsp;
 
 ### Comments
 
@@ -8,21 +69,28 @@ Inline comments only
 // You know what it is.
 ```
 
-### Variables
+&nbsp;
 
-Declare your first variable:
+### Logging
 
 ```js
-a = 1
+print 'hello world'
+print(foo)
 ```
 
-Now, mutate the variable:
+&nbsp;
+
+### Variables
 
 ```js
+// Declare your first variable:
+a = 1
+
+// Override your first variable:
 a = 2
 ```
 
-Scopes can only mutate their own variables.
+Because assignment is actually an override, nested scopes cannot affect their parent scopes (without reactivity).
 
 ```js
 a = 1
@@ -30,58 +98,88 @@ do {
   a = 2
   b = 2
   print(a) // 2
+  print(b) // 2
 }
 print(a) // 1
-print(b) // void
+print(b) // error: 'b' was never declared
 ```
 
-### Holes
+Conditional overrides affect the variable type:
 
 ```js
-// Sparse list
-list = [1, _, 3]
-list[1] // => void
+a = 1
+b = 1
+do {
+  a = a > 0 ? 'foo' : _
+  if b > 0: b = true
 
-// Shorthand void return
-noop = () => _
-noop() // => void
-
-// Ignored params
-cb = (_, _, c) => c
+  assert(a is string | void)
+  assert(b is true | number)
+}
 ```
 
-### Objects
+&nbsp;
+
+### Reactivity
+
+Local variables can be reactive. They always reflect the latest evaluation of their expression.
 
 ```js
-foo = (a: 1, b: 2)
-empty = ()
+*foo = bar + 1
+assert(foo == bar + 1)
 
-bar = (foo)
-assert(bar.foo == foo)
+// Cache the current value:
+snapshot = foo
+assert(foo == snapshot)
+
+// Trigger an update:
+bar += 1
+assert(foo == bar + 1)
+assert(foo != snapshot)
+
+// Disable reactivity by re-binding `foo`:
+foo = null
+
+// You can export reactive variables.
+export *foo
 ```
 
-Function calls let you omit parentheses when an object is the only argument.
+Reactive objects/arrays/sets are the only way for nested scopes to affect their parent scopes.
 
 ```js
-// 1 argument
-print(a: 1, b: 2)
-
-// 2+ arguments
-print((a: 1), (b: 2))
+*state = (a: 1)
+do {
+  state.a = 2
+}
+assert(state.a == 2)
 ```
 
-### Null
+&nbsp;
 
-The intentional value for "nothing yet something".
+### null
+
+The primitive value for "intentional nothing".
 
 ```js
 a = null
 assert(typeof a == 'null')
 ```
 
+&nbsp;
+
+### void
+
+Functions that return nothing have a return type of `void`.
+
+The only `void` value is the hole value: `_`
+
+Learn more about holes [here](#holes).
+
+&nbsp;
+
 ### Strings
 
-```js
+```c
 // Interned string
 foo = 'hi there'
 
@@ -100,52 +198,209 @@ print(bar) // "hello\nworld"
 foo = 'a' + 'b'
 ```
 
-### Reactivity
+&nbsp;
 
-Reactive bindings tie a variable or parameter to another variable.
+### Numbers
 
-```js
-// Bind `foo` to `bar + 1`
-*foo = bar + 1
+Fractions and whole numbers have the same `number` type.
 
-// Reactive functions can have reactive arguments.
-test = *(a, b) { ... }
-test(bar)  // BAD
-test(*bar) // GOOD
-test(*foo)  // GOOD
+```rust
+// Fractions
+0.5
 
-// Strip reactivity from `foo`
-foo = *foo
-foo = null
+// Scientific notation
+1e3
 
-// Strip reactivity from `test`
-test = *test
-test = null
+// Infinity
+inf
+
+// Big integers
+2i
+
+// Long numbers
+1_000_000
 ```
 
-### Catch blocks
+&nbsp;
 
-Catch blocks can follow any block.
+### Number comparison
 
-```js
-do {
-  throw 'any value'
-} catch(e) {
-  throw e // re-throwing is okay
-}
+The basics:
+- `>`
+- `<`
+- `>=`
+- `<=`
 
-if (foo) {
-  throw 'foo == true'
-} else {
-  throw 'foo == false'
-} catch(e) {
-  // errors come from `if` or `else` blocks
-}
+&nbsp;
+
+### Ranges
+
+```rust
+// Closed ranges
+range = 1..3
+range = 1..<3
+
+// Open ranges
+range = <3
+range = >=0
+
+// Fractional ranges
+range = 1.5..2.5
 ```
 
-### Lists
+Ranges can be used to slice strings and lists:
 
-Lists are immutable, ordered collections.
+```js
+array = [1, 2, 3, 4]
+
+array[>1]    // => [3, 4]
+array[1..2]  // => [2, 3]
+
+'abcd'[>1]   // => "cd"
+'abcd'[1..2] // => "bc"
+```
+
+&nbsp;
+
+### The `in` operator
+
+```js
+let result: boolean
+result = value in sequence
+```
+
+The `sequence` is one of `Range | Array | Set | Object`.
+
+The meaning of `value` depends on the `sequence` type:
+- `Range` means `value` must be a number
+- `Array|Set` means `in` returns true when
+
+The meaning of `result == true` depends on the `sequence` type:
+- `Range` means `value` is in the given range
+- `Array|Set` means `value` is in the list
+- `Object` means `value` is a key that's defined in the object
+
+```js
+// w/ ranges
+0 in >1       // => false
+1.99 in 0..2  // => true
+
+// w/ arrays
+0 in []       // => false
+0 in [1]      // => false
+1 in [1]      // => true
+
+// w/ objects
+'a' in ()     // => false
+'a' in (a: 1) // => true
+```
+
+&nbsp;
+
+### Equality operators
+
+```js
+assert(1 == 1) // exact
+assert(1 != 1) // not exact
+assert(1 ~= 1) // shallow equal
+```
+
+&nbsp;
+
+### The `typeof` operator
+
+```js
+typeof [] == "array"
+typeof () == "object"
+typeof Set() == "set"
+typeof 0 == "number"
+typeof Foo == "class"
+typeof Foo() == "object"
+typeof (add() {}).add == "method"
+typeof (add() => {}) == "function"
+typeof null == "null"
+typeof _ == "void"
+typeof ^{} == "fiber"
+```
+
+&nbsp;
+
+### Objects
+
+```js
+foo = (a: 1, b: (c: 1))
+assert(foo.a == foo.b.c)
+
+// Use variable names and values.
+bar = (:foo, bar: 1)
+assert(bar.foo == foo)
+```
+
+Objects are **copied on mutation,** but local variables always have the newest copy.
+
+```js
+foo = (a: 1)
+bar = foo
+
+foo.a = 2
+assert(foo != bar)
+assert(foo.a == 2)
+assert(bar.a == 1)
+```
+
+Function calls let you omit parentheses when an object is the only argument.
+
+```js
+// 1 argument
+print(a: 1, b: 2)
+
+// 2+ arguments
+print((a: 1), (b: 2))
+```
+
+You can call an object to shallow merge other objects.
+
+```js
+obj = (a: 1, b: (c: 1))
+obj(a: 2, b: (), c: 2)
+
+assert(obj.a == 2)
+assert(obj.b.c == _)
+assert(obj.c == 2)
+```
+
+Object keys can be _any_ value.
+
+For non-strings, use `[]` to get/set on existing objects:
+
+```js
+// Numbers
+obj[0] = true
+obj[0.1] = true
+
+// Objects
+obj[obj] = obj
+
+// Anything
+obj[null] = true
+```
+
+For non-strings, use `[]:` to define on new objects:
+
+```js
+obj = (
+  a: 1,
+  0: true,
+  [inf]: true,
+  [null]: true,
+)
+```
+
+&nbsp;
+
+### Arrays
+
+Arrays are immutable, ordered collections.
 
 ```js
 foo = [1, 2, 3]
@@ -155,28 +410,66 @@ assert(foo[0] == 1)
 bar = foo
 assert(bar == foo)
 
-// Mutating produces a copy
+// Mutating triggers an implicit copy
 bar[0] = 2
-assert(bar ~= foo)
+assert(bar != foo)
 ```
 
-And here is multi-line syntax:
+The multi-line syntax allows for trailing commas:
 
 ```js
-list = [
+array = [
   1,
   2,
   3,
 ]
 ```
 
-### Equality
+&nbsp;
+
+### Length operator
+
+The length operator is taken from Lua.
 
 ```js
-assert(1 == 1) // exact
-assert(1 != 1) // not exact
-assert(1 ~= 1) // shallow equal
+// Number of items
+array = []
+assert(#array == 0)
+
+// Number of keys
+object = ()
+assert(#object == 0)
+
+// Length of string
+string = ''
+assert(#string == 0)
 ```
+
+&nbsp;
+
+### Holes
+
+```js
+// Sparse array
+array = [1, _, 3]
+array[1] // => _
+
+// Shorthand void return
+noop = () => _
+noop() // => _
+
+// Ignored params
+cb = (_, _, c) => c
+
+// Ignore all params
+truth = _ => true
+
+// Currying
+fun = (a, b) => a / b
+fun(_, 2)(6) // => 3
+```
+
+&nbsp;
 
 ### Boolean chaining
 
@@ -192,6 +485,8 @@ a = b or c
 
 The `or` operator returns `b` when `b` is truthy, else if returns `c`.
 
+&nbsp;
+
 ### Ternary operator
 
 ```js
@@ -204,151 +499,210 @@ When `b` and `c` are strict equal, you can shorten the expression:
 a = b ?: d
 ```
 
-### Enums
+&nbsp;
+
+### If statements
 
 ```js
-enum Foo { A, B, C }
+// One-liner
+if foo: bar()
 
-assert(Foo.A == 1)
-assert(Foo.B == 2)
-assert(Foo.C == 4)
-
-// Function that takes a Foo enum value.
-test = (foo: Foo): number {
-  foo > .A ? 1 : 0
+// Multi-line
+if foo {
+  // do something if `foo` is truthy
+} else if cond {
+  // do something if `foo` and `bar` are falsy and `cond` is truthy
+} else {
+  // do something if `foo`, `bar`, and `cond` are falsy
 }
-test(Foo.A) // => 0
-test(Foo.B) // => 1
-test(Foo.C) // => 1
 
-// To avoid importing anything:
-test(.Bar)
-
-test(1)
-// error: expected enum Foo, got 1
-```
-
-### Sets
-
-Sets are lists with built-in deduplication.
-
-```js
-foo = Set(1, 2, 3)
-assert(foo[0] == 1)
-
-bar = foo
-assert(bar == foo)
-
-bar.add(4)
-assert(bar != foo)
-```
-
-### Maps
-
-```js
-map = {
-  'a' = 1, // string key
-  1 = 2,   // number key
-  k = 3,   // any key
+// Bind a nullable value
+a = ()
+if foo = a.b.c.d {
+  // The a.b.c fails and this never runs,
+  // but an error is never thrown.
+  //
+  // You will still get compiler errors if
+  // you try accessing unknown properties
+  // or try treating a number like an object.
 }
 ```
 
-### Destructuring
+&nbsp;
+
+### Do blocks
+
+Do blocks are IIFEs done right.
 
 ```js
-// Lists / Sets
-[a, b, ..rest] = [1, 2, 3, 4]
-assert(a == 1)
-assert(b == 2)
-assert(rest ~= [3, 4])
-
-// Records / Maps
-(a, b, ..rest) = (a: 1, b: 2, c: 3)
-assert(a == 1)
-assert(b == 2)
-assert(rest ~= (c: 3))
+do {
+  // do something in a new scope
+}
 ```
 
-### Symbols
+The last expression of a do block is always its return value.
+
+The `try` keyword is an alias of `do`.
+
+&nbsp;
+
+### Catch blocks
+
+Catch blocks can follow _any_ block, not just `try` blocks.
 
 ```js
-// Create a symbol.
-foo = @"a b"
+try {
+  throw 'any value'
+} catch(e) {
+  throw e // re-throwing is okay
+}
 
-// Symbols have an identity.
-assert(foo != @"a b")
-
-// Access a property with a symbol.
-obj[foo]
-obj[@"a b"] // => never
+if (foo) {
+  throw 'foo == true'
+} else {
+  throw 'foo == false'
+} catch {
+  // do something when `if` or `else` blocks throw
+}
 ```
 
-### Imports
+&nbsp;
+
+### Loops
+
+Loops can be one-liners or blocks.
+
+Of course, `break` and `continue` exist.
 
 ```js
-// Import parts of a module.
-import (a, b, c) from './path/to/module'
+// for..of (one-liner)
+for value of [1, 2, 3]: print(value)
 
-// Import all of a module.
-import foo from './path/to/module'
+// for..of
+for value of [1, 2, 3] {
+  print(value)
+}
+
+// for..in (one-liner)
+for i in 1..3: print(i)
+
+// for..in (with object)
+for key in obj {
+  assert(key in obj)
+}
+for (key, value) in obj {
+  assert(obj[key] == value)
+}
+
+// for..in (with array)
+for index in array {
+  assert(index in 0 ..< #array)
+}
+for (index, value) in array {
+  assert(array[index] == value)
+}
+
+// for..in (with types)
+for (key: id) in (a: 1, b: 2) {
+  print(key)
+}
+
+// while (one-liner)
+while true: foo()
+
+// while
+while a > b {
+  foo(a, b)
+}
+
+// until (one-liner)
+until false: foo()
+
+// until
+until a < b {
+  foo()
+}
+
+// do..while (one-liner)
+do { foo(a, b) } while true
+
+// do..until (one-liner)
+do { foo(a, b) } until a > b
+
+// try..catch..while
+try {
+  foo(a, b)
+}
+catch(err: Error) {
+  // Catches `do` errors, then moves to `while` condition
+  // if this block doesn't throw as well.
+}
+while a < b
 ```
 
-### Exports
+The `for..of` and `for..in` loops are null-safe, which means the loop is skipped when its source is non-iterable.
 
-When the `export` keyword is first used with an object literal, that object is used to hold all future exports. All other object literals are merged into it. Pass anything else to override the current exports.
+`do/try..while` loops are incapable of being one-liners.
 
-```js
-// Export variables and expressions.
-export (
-  foo: a + 1,
-  bar: b,
-  c,
-  d,
-  e,
-)
-
-// Export anything other than an object literal to override previous exports.
-export 1 + 1
-```
-
-## Control Flow
+&nbsp;
 
 ### Functions
 
 ```js
-// Function that does nothing.
-noop = () => void
-
-// One-line function w/ inferred types
-foo = (a, b) => (a / 2) * (b / 2)
-assert(foo is (a: number, b: number) => number)
-
-// Multi-line function w/ explicit types
-bar = (
-  a: number,
-  b: number,
-): number {
+// Function block (explicit types)
+bar = (a: number, b: number): number {
   a + b
 }
+
+// One-line function (inferred types)
+add = (a, b) { a + b }
+assert(add is (a: any, b: any) => any)
+// (explicit types)
+add = (a: number, b: number): number { a + b }
+assert(add is (a: number, b: number) => number)
 ```
 
-As you may have noticed, all functions have implicit return values.
+You may have noticed that all functions have implicit return values.
+
 To disable implicit return, use `void` as the function's return type.
 
 ```js
-bar = (a, b): void {
-  a + b
+bar = (a, b): void { a + b }
+bar() // => _
+```
+
+To return early, use the `return` keyword.
+
+```js
+foo = (a, b) {
+  if a < 0 or b < 0: return 0
+  //
+  // [insert tons of code here]
+  //
 }
-bar() // => void
+```
+
+You must use reactive objects/arrays to mutate above your own scope:
+
+```js
+*state = (a: 1)
+do {
+  state.a = 2
+}
+assert(state.a == 2)
 ```
 
 #### Optional arguments
+
+An optional argument _cannot_ precede a required argument.
 
 ```js
 foo = (a?, b?: number) => a or b
 ```
 
 #### Rest arguments
+
+Just like with destructuring, the rest operator can appear anywhere in the argument list.
 
 ```js
 foo = (a, ..b: number[]) => b
@@ -375,6 +729,8 @@ div = (a, b, c) => a / b / c
 bar = foo | add(5, _) | div(1, _, 3)
 ```
 
+In pipelines, you can only use one hole `(_)` per curry.
+
 #### Optional parens
 
 If only passing an inline string/object/fiber literal, you can omit the parentheses of a function call.
@@ -396,19 +752,124 @@ fun ^{
 }
 ```
 
-### Logging
+#### Bound functions
+
+In bound functions, `this` refers to the parent scope's `this`. If the parent scope has no implicit context, using `this` is a compiler error.
 
 ```js
-print 'hello world'
+// same penalty as accessing a variable from the parent scope
+fn = () => this
 ```
+
+If you never use `this`, the context is optimized out.
+
+```js
+// no this, no penalty
+fn = () => 1
+```
+
+Bound functions can be multi-line:
+
+```js
+fn = (a, b) => {
+  a + b
+}
+```
+
+Function declarations should have explicit argument types. The return type can be implicit!
+
+```js
+fn = (a: number, b: number) => a + b
+assert(fn is (a: number, b: number) => number)
+
+// Inline functions can omit argument types.
+doSomething((a, b) => a + b)
+``
+
+&nbsp;
+
+### Methods / The "this" keyword
+
+"Methods" are functions that are known to be owned by an object.
+
+Every method has an implicit context called `this`.
+
+```js
+// NOTE: The explicit types are optional.
+
+type Foo = (
+  foo: number,
+  addFoo(n: number): void,
+  bar?(): void,
+)
+
+obj = <Foo>(
+  foo: 1,
+  addFoo(n) { this.foo + n },
+)
+
+// Call a method
+obj.addFoo() // => 1
+
+// Call a possible method
+obj.bar?() // => _
+
+// Methods can become functions
+(:getFoo) = obj
+
+// But their `this` argument becomes the first argument
+getFoo(foo: 2) // => 2
+```
+
+Declare a `this` argument to turn any function into method:
+
+```js
+// Method declaration
+add = (this: (foo: number), n: number) {
+  this.foo + n
+}
+
+bar = (foo: 1, add)
+bar.add(1)       // => 2
+
+// Other ways to call unbound methods:
+add((foo: 1), 1) // => 2
+(foo: 1):add(1)  // => 2
+
+// Bind `this` with the `bind` method (only available on methods)
+getFoo2 = add.bind(foo: 1)
+getFoo2() // => 1
+```
+
+Methods are hidden from `for..in` and `in` alone.
+
+&nbsp;
+
+### The `:` operator
+
+The `:` operator lets functions be used as makeshift methods.
+
+```js
+add = (a: number, b: number) { a + b }
+
+// The expression to the left of `:` becomes the first argument
+foo = 1
+foo:add(1) // => 2
+```
+
+&nbsp;
 
 ### Fibers
 
-Fibers enable cooperative threading.
+Fibers enable cooperative concurrency.
 
 The active fiber is in control of its thread until it yields.
 
 ```js
+// We are always on a fiber!
+assert(Fiber.self())
+
+// A yielding function (not a fiber)
 foo = (a, b) {
   // On every yield, the current fiber is suspended.
   // The yielded value is given to whoever resumed the fiber.
@@ -418,31 +879,36 @@ foo = (a, b) {
 
 Certain actions yield automatically (eg: network requests, disk I/O).
 
+Fibers must be resumed manually, unless created in the main fiber.
+
 #### Creating fibers
 
 ```js
 foo = ^{
   yield 1
-  yield // same as `yield null`
+  result = yield // same as `yield _`
   assert(Fiber.main is Fiber)
   assert(Fiber.self() is Fiber)
+  result
 }
 catch {
   // Catch any errors thrown by the fiber.
 }
+assert(foo)
+assert(foo is Fiber?) // Goes null after it returns.
 
-// Start or resume the fiber.
-assert(foo() == 1)
-assert(foo() == null)
-assert(foo.done)
-assert(foo() == null)
-assert(foo.done)
+// Call a fiber to start or resume it.
+results = while foo: foo()
+assert(results ~= [ 1, _, _ ])
+
+// When a fiber returns, all references are lost.
+assert(foo == null)
 ```
 
-Use `do ^{}` to create a fiber whose yielded values are ignored:
+Use `try ^{}` for fire-and-forget fibers:
 
 ```js
-do ^{
+try ^{
   // Whatever you yield is ignored.
   yield 3.14
 
@@ -451,67 +917,220 @@ do ^{
 print 'after fiber' // this logs first
 ```
 
-### If statements
+&nbsp;
+
+### Sets
+
+Sets are arrays with transparent deduplication.
 
 ```js
-// One-liner
-if (foo) bar()
+// Set literal
+foo = Set(1, 2, 3, 2, 3, 1)
+assert(foo is Set)
 
-// Multi-line
-if (foo) {
-  // do something if `foo` is truthy
-} then if (bar) {
-  // do something if `foo` and `bar` are truthy
-} else if (cond) {
-  // do something if `foo` and `bar` are falsy and `cond` is truthy
-} else {
-  // do something if `foo`, `bar`, and `cond` are falsy
+// Array{} -> Set{}
+foo = Set(..[ 1, 1 ])
+
+// Object{} -> Set{}
+foo = Set(..Object.keys(a: 1, b: 2))
+bar = Set(..Object.values(0: 'a', 1: 'b'))
+foo = Set(..for key in obj: key)
+bar = Set(..for val of obj: val)
+
+// Sets are a subclass of arrays, so they can be compared.
+assert(foo ~= ['a', 'b'])
+assert(bar ~= ['a', 'b'])
+
+// Capture the current value into `bar`
+bar = foo
+assert(foo == bar)
+
+// Add a value to `bar`
+bar.push(4)
+assert(foo != bar)
+bar = foo
+```
+
+&nbsp;
+
+### Destructuring
+
+```js
+// Arrays / Sets
+[a, b, ..rest] = [1, 2, 3, 4]
+assert(a == 1)
+assert(b == 2)
+assert(rest ~= [3, 4])
+
+// Objects
+(:a, :b, ..rest) = (a: 1, b: 2, c: 3)
+assert(a == 1)
+assert(b == 2)
+assert(rest ~= (c: 3))
+```
+
+The rest operator (`..`) can only appear once per statement. It can be anywhere in the list of variable names.
+
+```js
+[..rest, last] = [1, 2]
+assert(rest is Array)
+assert(rest[0] == 1)
+assert(last == 2)
+
+[a, ..foo, b] = [1, 2, 3, 4]
+assert(a == 1)
+assert(b == 4)
+assert(foo[0] == 2)
+assert(foo[1] == 3)
+```
+
+&nbsp;
+
+### Symbols
+
+```js
+// Create a symbol.
+foo = @"a b"
+
+// Symbols have an identity.
+assert(foo != @"a b")
+
+// Access a property with a symbol.
+obj[foo]
+obj[@"a b"] // => _
+```
+
+&nbsp;
+
+### RegExp
+
+```js
+// RegExp literal
+foo = /.+/g
+
+// RegExp block
+foo = /
+  .+    // whitespace and comments are ignored
+/g
+```
+
+&nbsp;
+
+### Enums
+
+```js
+enum Foo { A, B, C }
+
+assert(Foo.A == 1)
+assert(Foo.B == 2)
+assert(Foo.C == 4)
+
+// Function that takes a Foo enum value.
+test = (foo: Foo): number {
+  foo > .A ? 1 : 0
 }
+test(Foo.A) // => 0
+test(Foo.B) // => 1
+test(Foo.C) // => 1
+
+// You can avoid importing `Foo`
+test(.B) // => 1
+
+test(1)
+// error: expected enum Foo, got 1
 ```
 
-### Do blocks
+&nbsp;
 
-Do blocks are sleaker IIFEs.
-
-The last expression of a do block is its return value.
+### Imports
 
 ```js
-do {
-  // do stuff..
-}
+// Import parts of a module.
+import (a, b, c) from './path/to/module'
+
+// Import all of a module.
+import foo from './path/to/module'
 ```
 
-### Ranges
+&nbsp;
+
+### Exports
+
+When the `export` keyword is first used with an object literal, that object is used to hold all future exports. All other object literals are merged into it. Pass anything else to override the current exports.
 
 ```js
-// Closed ranges
-range = 1..3
-range = 1..<3
-assert(range is Range)
+// Export any variable or expression
+export (
+  foo: a + 1,
+  bar: b,
+  c,
+  d,
+  e,
+)
 
-// Open ranges
-range = <3
-range = >=0
-assert(range is Range)
+// Override previous exports with any value
+export 1 + 1
+
+// Export a constant
+export foo = 1 + 1
+print(foo) // => 2
+
+// Export a reactive variable
+export *bar = foo + 1
 ```
+
+&nbsp;
+
+### Async imports
+
+Async `import()` is a yielding function.
+
+```js
+import('https://cdn.nitro-lang.com/lodash@4.17.11/lodash.min.nt')
+```
+
+&nbsp;
+
+### Import hooks
+
+```js
+// Load the JS->NT compiler to translate & memoize on-demand.
+import.extend(/\.js$/, nitro.compileJS)
+```
+
+&nbsp;
+
+### Runtime type-checking
+
+```js
+assert(1 is number) // => true
+assert(typeof 1)    // => 'number'
+```
+
+&nbsp;
 
 ## Static Typing
 
+The type system tries to adhere to TypeScript norms when possible.
+
 Primitive types:
-- `byte`
+- `null`
 - `bool`
 - `number`
 - `string`
 - `object`
-- `list`
-
-Abstract types:
-- `any` (extended by every type)
 - `never` (extends every type)
+- `any` (extended by every type)
+
+Generic types:
+- `([key: any]: any)`
+- `Set<any>`
 
 Collection types:
-- `any[]` (a list of anything)
-- `[number]` (a fixed list containing one number)
+- `any[]` (an array of anything)
+- `[number]` (a fixed array containing one number)
+
+&nbsp;
 
 ### Inferred types
 
@@ -538,6 +1157,8 @@ assert(foo is (a: number) => number)
 assert(bar is () => 1)
 ```
 
+&nbsp;
+
 ### Explicit types
 
 For explicit types, tuple/object/function types must be used via type alias.
@@ -551,6 +1172,8 @@ foo = '1'
 
 The type of a `let` binding can never change.
 
+&nbsp;
+
 ### Non-nullable
 
 Use `!` to denull a value.
@@ -561,6 +1184,8 @@ let bar: number
 
 bar = foo!
 ```
+
+&nbsp;
 
 ### Type casting
 
@@ -575,3 +1200,5 @@ foo(<any>'1')
 // Cast a return value
 bar = <any>foo(1)
 ```
+
+Type casting is forbidden inside JSX.
