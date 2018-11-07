@@ -27,12 +27,12 @@ Since JSX is the new hotness, let's learn about JSX in Nitro before anything els
 Nitro's stdlib has JSX utilities built-in.
 
 ```js
-import (render, useContext, ReactElement) from 'nitro-react'
+import (render, useContext, ReactNode) from 'nitro-react'
 
-type Props = (id: string, items: ReactElement[])
+type Props = (id: string, items: ReactNode[])
 
 Foo = (props: Props, children) {
-  theme = useContext(ThemeProvider)
+  theme = useContext(ThemeContext)
 
   // Expressions must be wrapped with parens..
   <div hidden id=(props.id)>
@@ -54,7 +54,12 @@ Foo = (props: Props, children) {
   </div>
 }
 
-render(<Foo id="foo">Hello world</Foo>)
+items = (a: 1, b: 0, c: 1)
+render(
+  <Foo id="foo" :items>
+    "Hello world"
+  </Foo>
+)
 ```
 
 In the future, the stdlib will have useful primitives for creating your own React-like library. This will provide maximum interoperability between component-based frameworks.
@@ -117,6 +122,8 @@ do {
   assert(b is true | number)
 }
 ```
+
+[Do blocks](#do-blocks) and [if statements](#if-statements) are described later on.
 
 &nbsp;
 
@@ -515,27 +522,32 @@ if foo {
 } else {
   // do something if `foo`, `bar`, and `cond` are falsy
 }
+```
 
-// Bind a nullable value
+You can bind a variable in the condition of an `if` statement:
+
+```js
+let a: (b?: (c?: (d: number)))
 a = ()
+
+// The `foo` variable is only accessible inside the `if` block.
 if foo = a.b.c.d {
-  // The a.b.c fails and this never runs,
-  // but an error is never thrown.
-  //
-  // You will still get compiler errors if
-  // you try accessing unknown properties
-  // or try treating a number like an object.
+  // Since `a.b` is void, `a.b.c.d` cannot be resolved.
+  // Instead of a runtime error, the `if` block is skipped.
+  // Of course, "if bindings" are still type-safe.
 }
 ```
+
+<sup>Psst. If anyone asks, they're called "if bindings".</sup>
 
 &nbsp;
 
 ### Do blocks
 
-Do blocks are IIFEs done right.
+Do blocks are [IIFE](https://en.wikipedia.org/wiki/Immediately-invoked_function_expression)s done right.
 
 ```js
-do {
+result = do {
   // do something in a new scope
 }
 ```
@@ -549,6 +561,10 @@ The `try` keyword is an alias of `do`.
 ### Catch blocks
 
 Catch blocks can follow _any_ block, not just `try` blocks.
+
+They prevent `throw` statements from crashing the program.
+
+They can optionally bind the thrown value to a variable, which is only accessible inside the catch block.
 
 ```js
 try {
@@ -565,6 +581,34 @@ if (foo) {
   // do something when `if` or `else` blocks throw
 }
 ```
+
+Catch blocks can declare which value types they expect.
+
+```js
+try {}
+// Only catch errors (the default behavior)
+catch(e: Error) {
+  throw e
+}
+// To catch non-errors, you must use explicit types:
+catch(value: any) {
+  print(value)
+}
+```
+
+Catch blocks can follow catch blocks. :)
+
+The compiler throws if you place a catch block with a broader type (ie: less specific) before a catch block with a narrower type (ie: more specific).
+
+&nbsp;
+
+### Finally blocks
+
+Finally blocks are guaranteed to run before their scope pops, just like in Javascript.
+
+Unlike `catch` blocks, `finally` blocks have no binding (eg: `catch error`).
+
+Other than that, they are identical to `catch` blocks.
 
 &nbsp;
 
@@ -673,6 +717,8 @@ bar() // => _
 
 To return early, use the `return` keyword.
 
+You _cannot_ use `return` in the last statement of a function.
+
 ```js
 foo = (a, b) {
   if a < 0 or b < 0: return 0
@@ -686,29 +732,44 @@ You must use reactive objects/arrays to mutate above your own scope:
 
 ```js
 *state = (a: 1)
-do {
-  state.a = 2
-}
+foo = () { state.a += 1 }
+
+foo()
 assert(state.a == 2)
+
+foo()
+assert(state.a == 3)
 ```
 
-#### Optional arguments
+&nbsp;
+
+### Optional arguments
 
 An optional argument _cannot_ precede a required argument.
 
 ```js
 foo = (a?, b?: number) => a or b
+
+foo()     // => _
+foo(1)    // => 1
+foo(0, 2) // => 2
 ```
 
-#### Rest arguments
+&nbsp;
+
+### Rest arguments
 
 Just like with destructuring, the rest operator can appear anywhere in the argument list.
 
 ```js
 foo = (a, ..b: number[]) => b
+
+foo(1, 2, 3) // => [2, 3]
 ```
 
-#### Currying
+&nbsp;
+
+### Currying
 
 ```js
 add = (a: number, b: number) => a + b
@@ -719,7 +780,9 @@ addFive(1) // => 6
 addFive = add(_, 5)
 ```
 
-#### Pipelines
+&nbsp;
+
+### Pipelines
 
 ```js
 add = (a, b) => a + b
@@ -729,9 +792,11 @@ div = (a, b, c) => a / b / c
 bar = foo | add(5, _) | div(1, _, 3)
 ```
 
-In pipelines, you can only use one hole `(_)` per curry.
+In pipelines, you can only use one hole (`_`) per curry. Also, you cannot pipe into a function with 2+ required arguments. You should curry those functions into 1-argument functions first.
 
-#### Optional parens
+&nbsp;
+
+### Optional parens
 
 If only passing an inline string/object/fiber literal, you can omit the parentheses of a function call.
 
@@ -752,9 +817,70 @@ fun ^{
 }
 ```
 
-#### Bound functions
+&nbsp;
 
-In bound functions, `this` refers to the parent scope's `this`. If the parent scope has no implicit context, using `this` is a compiler error.
+### Methods and the `this` keyword
+
+"Methods" are functions that are known to be owned by an object.
+
+They are hidden from `for..in` loops and the `in` operator.
+
+Every method has an implicit context called `this`.
+
+```js
+// NOTE: The explicit types are optional.
+
+type Foo = (
+  foo: number,
+  addFoo(n: number): void,
+  bar?(): void,
+)
+
+obj = <Foo>(
+  foo: 1,
+  addFoo(n) { this.foo + n },
+)
+
+// Call a method
+obj.addFoo() // => 1
+
+// Call a possible method
+obj.bar?() // => _
+
+// Methods can become functions
+(:addFoo) = obj
+
+// But their `this` argument becomes the first argument
+addFoo(obj, 1) // => 2
+```
+
+Declare a `this` argument to turn any function declaration into a method declaration:
+
+```js
+// Method declaration
+add = (this: (foo: number), n: number) {
+  this.foo + n
+}
+
+bar = (foo: 1, add)
+bar.add(1)       // => 2
+
+// Other ways to call unbound methods:
+add((foo: 1), 1) // => 2
+(foo: 1):add(1)  // => 2
+
+// Bind `this` with the `bind` method (only available on methods)
+boundAdd = add.bind(foo: 1)
+boundAdd(1) // => 2
+```
+
+&nbsp;
+
+### Bound functions
+
+In bound functions, `this` refers to the parent scope's `this`.
+
+If the parent scope has no implicit context, using `this` is a compiler error.
 
 ```js
 // same penalty as accessing a variable from the parent scope
@@ -784,64 +910,7 @@ assert(fn is (a: number, b: number) => number)
 
 // Inline functions can omit argument types.
 doSomething((a, b) => a + b)
-``
-
-&nbsp;
-
-### Methods / The "this" keyword
-
-"Methods" are functions that are known to be owned by an object.
-
-Every method has an implicit context called `this`.
-
-```js
-// NOTE: The explicit types are optional.
-
-type Foo = (
-  foo: number,
-  addFoo(n: number): void,
-  bar?(): void,
-)
-
-obj = <Foo>(
-  foo: 1,
-  addFoo(n) { this.foo + n },
-)
-
-// Call a method
-obj.addFoo() // => 1
-
-// Call a possible method
-obj.bar?() // => _
-
-// Methods can become functions
-(:getFoo) = obj
-
-// But their `this` argument becomes the first argument
-getFoo(foo: 2) // => 2
 ```
-
-Declare a `this` argument to turn any function into method:
-
-```js
-// Method declaration
-add = (this: (foo: number), n: number) {
-  this.foo + n
-}
-
-bar = (foo: 1, add)
-bar.add(1)       // => 2
-
-// Other ways to call unbound methods:
-add((foo: 1), 1) // => 2
-(foo: 1):add(1)  // => 2
-
-// Bind `this` with the `bind` method (only available on methods)
-getFoo2 = add.bind(foo: 1)
-getFoo2() // => 1
-```
-
-Methods are hidden from `for..in` and `in` alone.
 
 &nbsp;
 
@@ -881,7 +950,9 @@ Certain actions yield automatically (eg: network requests, disk I/O).
 
 Fibers must be resumed manually, unless created in the main fiber.
 
-#### Creating fibers
+&nbsp;
+
+### Creating fibers
 
 ```js
 foo = ^{
@@ -927,6 +998,7 @@ Sets are arrays with transparent deduplication.
 // Set literal
 foo = Set(1, 2, 3, 2, 3, 1)
 assert(foo is Set)
+assert(Set extends Array)
 
 // Array{} -> Set{}
 foo = Set(..[ 1, 1 ])
@@ -982,6 +1054,19 @@ assert(a == 1)
 assert(b == 4)
 assert(foo[0] == 2)
 assert(foo[1] == 3)
+```
+
+You can use array destructuring to swap variables.
+
+```js
+a = 1
+b = 2
+
+// This magic moment
+[a, b] = [b, a]
+
+assert(a == 2)
+assert(b == 1)
 ```
 
 &nbsp;
@@ -1161,13 +1246,15 @@ assert(bar is () => 1)
 
 ### Explicit types
 
-For explicit types, tuple/object/function types must be used via type alias.
-
 ```js
 let foo: number
+let bar: () => number
 
 foo = '1'
 // error: expected number, got string
+
+bar = (a) => 1
+// error: expected function type has no arguments
 ```
 
 The type of a `let` binding can never change.
