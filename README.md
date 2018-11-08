@@ -209,34 +209,65 @@ foo = 'a' + 'b'
 
 ### Numbers
 
-Fractions and whole numbers have the same `number` type.
-
 ```rust
+// Whole numbers
+12345
+
 // Fractions
 0.5
 
 // Scientific notation
 1e3
 
-// Infinity
-inf
-
-// Big integers
+// Big ints
 2i
+```
 
-// Long numbers
+The hole value (`_`) can be used to improve readability of long numbers.
+
+```rust
 1_000_000
 ```
 
-&nbsp;
+The following values are built-in constants:
 
-### Number comparison
+```rust
+inf // infinite positive number
+π   // an approximation of PI
+```
 
-The basics:
-- `>`
-- `<`
-- `>=`
-- `<=`
+Of course, numbers can be compared:
+
+```rust
+x > y
+x < y
+x >= y
+x <= y
+```
+
+And bitwise operators exist:
+
+```rust
+x & y   // and
+x | y   // or
+x ^ y   // xor
+~x      // not
+x << y  // left shift
+x >> y  // sign-propagating right shift
+x >>> y // zero-fill right shift
+```
+
+By default, all number literals are the `number` type.
+
+Use type-casting to optimize memory usage:
+
+```rust
+a = 1
+b = <int8>a
+
+assert(a is number)
+assert(b is int8)
+```
 
 &nbsp;
 
