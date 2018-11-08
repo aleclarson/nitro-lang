@@ -1236,17 +1236,24 @@ assert(typeof 1)    // => 'number'
 The type system tries to adhere to TypeScript norms when possible.
 
 Primitive types:
+- `void`
 - `null`
 - `bool`
+  - `true`
+  - `false`
 - `number`
+  - `int8`
+  - `uint8`
 - `string`
 - `object`
+- `function`
+- `fiber`
 - `never` (extends every type)
 - `any` (extended by every type)
 
 Generic types:
-- `([key: any]: any)`
-- `Set<any>`
+- `([key: any]: any)` (an object with known key/value type)
+- `Set<any>` (a set containing anything)
 
 Collection types:
 - `any[]` (an array of anything)
