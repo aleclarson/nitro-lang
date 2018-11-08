@@ -1135,6 +1135,12 @@ import (a, b, c) from './path/to/module'
 
 // Import all of a module.
 import foo from './path/to/module'
+
+// Do both at once.
+import foo, (a, b, c) from './path/to/module'
+
+// Reactive variables must be marked as such.
+import (*foo) from './path/to/module'
 ```
 
 &nbsp;
