@@ -315,7 +315,7 @@ The meaning of `value` depends on the `sequence` type:
 
 The meaning of `result == true` depends on the `sequence` type:
 - `Range` means `value` is in the given range
-- `Array|Set` means `value` is in the list
+- `Array|Set` means `value` is in the given array/set
 - `Object` means `value` is a key that's defined in the object
 
 ```js
@@ -1028,8 +1028,8 @@ Sets are arrays with transparent deduplication.
 ```js
 // Set literal
 foo = Set(1, 2, 3, 2, 3, 1)
-assert(foo is Set)
-assert(Set extends Array)
+assert(foo is Set<number>)
+assert(type(foo) extends Array<number>)
 
 // Array{} -> Set{}
 foo = Set(..[ 1, 1 ])
@@ -1076,7 +1076,7 @@ The rest operator (`..`) can only appear once per statement. It can be anywhere 
 
 ```js
 [..rest, last] = [1, 2]
-assert(rest is Array)
+assert(rest is Array<number>)
 assert(rest[0] == 1)
 assert(last == 2)
 
