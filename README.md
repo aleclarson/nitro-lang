@@ -197,11 +197,11 @@ print(bar) // "hi there everyone"
 // Multi-line
 bar = "
   hello
-  world
+  world  // comments are ignored
 "
 print(bar) // "hello\nworld"
 
-// Concatenated string
+// Merging two strings:
 foo = 'a' + 'b'
 ```
 
