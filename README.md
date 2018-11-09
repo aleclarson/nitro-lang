@@ -1209,15 +1209,21 @@ obj[@"a b"] // => _
 
 ### RegExp
 
-```js
-// RegExp literal
-foo = /.+/g
+The syntax for `RegExp` literals is familiar to most web developers:
 
-// RegExp block
-foo = /
-  .+    // whitespace and comments are ignored
-/g
+```js
+foo = /[a-z]+/gi
 ```
+
+Multi-line `RegExp` literals are great for readability.
+
+```js
+foo = (/
+  .+    // whitespace and comments are ignored
+/gi)
+```
+
+The parentheses are **required.**
 
 &nbsp;
 
