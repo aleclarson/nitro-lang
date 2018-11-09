@@ -586,6 +586,8 @@ assert(a == 2)
 assert(b == 1)
 ```
 
+The ["Functions" section](#functions) will teach you about destructuring an argument in the parameter list!
+
 &nbsp;
 
 ### Boolean chaining
@@ -802,6 +804,8 @@ The `for..of` and `for..in` loops are null-safe, which means the loop is skipped
 
 ### Functions
 
+Functions take an input value (in the form of an argument list) and return an output value (more commonly called the "return value").
+
 ```js
 // Function block (explicit types)
 bar = (a: number, b: number): number {
@@ -816,14 +820,20 @@ add = (a: number, b: number): number { a + b }
 assert(add is (a: number, b: number) => number)
 ```
 
-You may have noticed that all functions have implicit return values.
+&nbsp;
 
-To disable implicit return, use `void` as the function's return type.
+#### Implicit returns
+
+All functions have implicit return values, but you can opt-out on a per-function basis by declaring `void` as the return type.
 
 ```js
 bar = (a, b): void { a + b }
 bar() // => _
 ```
+
+&nbsp;
+
+#### Early returns
 
 To return early, use the `return` keyword.
 
@@ -849,6 +859,32 @@ assert(state.a == 2)
 
 foo()
 assert(state.a == 3)
+```
+
+&nbsp;
+
+### Argument destructuring
+
+You can use object/array/set destructuring inside the parameter list:
+
+```js
+// An object
+Point = ((x, y): (x: number, y: number)) {
+  print(:x, :y)
+}
+
+// An array
+Point = ([x, y]: [number, number]) {
+  print(:x, :y)
+}
+
+// Both in one function
+Component = (
+  [a, b, c]: [any, any, any],
+  (x, y, z): (x: number, y: number, z: number),
+) {
+  print(:a, :b, :c, :x, :y, :z)
+}
 ```
 
 &nbsp;
