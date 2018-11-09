@@ -509,6 +509,52 @@ fun(_, 2)(6) // => 3
 
 &nbsp;
 
+### Destructuring
+
+```js
+// Arrays / Sets
+[a, b, ..rest] = [1, 2, 3, 4]
+assert(a == 1)
+assert(b == 2)
+assert(rest ~= [3, 4])
+
+// Objects
+(:a, :b, ..rest) = (a: 1, b: 2, c: 3)
+assert(a == 1)
+assert(b == 2)
+assert(rest ~= (c: 3))
+```
+
+The rest operator (`..`) can only appear once per statement. It can be anywhere in the list of variable names.
+
+```js
+[..rest, last] = [1, 2]
+assert(rest is Array<number>)
+assert(rest[0] == 1)
+assert(last == 2)
+
+[a, ..foo, b] = [1, 2, 3, 4]
+assert(a == 1)
+assert(b == 4)
+assert(foo[0] == 2)
+assert(foo[1] == 3)
+```
+
+You can use array destructuring to swap variables.
+
+```js
+a = 1
+b = 2
+
+// This magic moment
+[a, b] = [b, a]
+
+assert(a == 2)
+assert(b == 1)
+```
+
+&nbsp;
+
 ### Boolean chaining
 
 ```js
@@ -1052,52 +1098,6 @@ assert(foo == bar)
 bar.push(4)
 assert(foo != bar)
 bar = foo
-```
-
-&nbsp;
-
-### Destructuring
-
-```js
-// Arrays / Sets
-[a, b, ..rest] = [1, 2, 3, 4]
-assert(a == 1)
-assert(b == 2)
-assert(rest ~= [3, 4])
-
-// Objects
-(:a, :b, ..rest) = (a: 1, b: 2, c: 3)
-assert(a == 1)
-assert(b == 2)
-assert(rest ~= (c: 3))
-```
-
-The rest operator (`..`) can only appear once per statement. It can be anywhere in the list of variable names.
-
-```js
-[..rest, last] = [1, 2]
-assert(rest is Array<number>)
-assert(rest[0] == 1)
-assert(last == 2)
-
-[a, ..foo, b] = [1, 2, 3, 4]
-assert(a == 1)
-assert(b == 4)
-assert(foo[0] == 2)
-assert(foo[1] == 3)
-```
-
-You can use array destructuring to swap variables.
-
-```js
-a = 1
-b = 2
-
-// This magic moment
-[a, b] = [b, a]
-
-assert(a == 2)
-assert(b == 1)
 ```
 
 &nbsp;
