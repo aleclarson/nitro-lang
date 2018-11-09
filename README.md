@@ -477,6 +477,27 @@ obj = (
 )
 ```
 
+#### Private keys
+
+Object keys that begin with `_` are private.
+
+"Private" affects the following:
+- IntelliSense hides private keys
+- Compiler prohibits third parties from:
+  - accessing private keys
+  - setting private keys
+
+```js
+obj = (
+  _a: true,
+  _1: true,
+)
+
+obj._a // => true
+obj._a = false
+obj._a // => false
+```
+
 &nbsp;
 
 ### Arrays
