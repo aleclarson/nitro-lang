@@ -186,24 +186,57 @@ Learn more about holes [here](#holes).
 
 ### Strings
 
-```c
-// Interned string
-foo = 'hi there'
+Strings are groups of characters surrounded by unescaped quotes.
 
-// Interpolated string
-bar = "{foo} everyone"
-print(bar) // "hi there everyone"
-
-// Multi-line
-bar = "
-  hello
-  world  // comments are ignored
-"
-print(bar) // "hello\nworld"
-
-// Merging two strings:
-foo = 'a' + 'b'
+```js
+// A static string
+foo = 'bar'
 ```
+
+Static strings are the most efficient string. They have no support for interpolation, but you can use the `+` operator to combine it with other values. Property names are inherently static strings, so using dot-notation like `foo.bar` is identical to `foo['bar']` in terms of performance.
+
+The syntax for joining two strings is familiar to most web developers:
+
+```js
+print 'a' + "b"
+// prints "ab"
+```
+
+&nbsp;
+
+### Interpolated Strings
+
+Interpolated strings must use double quotes.
+
+For variables, use the `$` prefix syntax.
+
+For expressions, use the `$()` wrapper syntax.
+
+Both syntaxes coerce the value to a string by calling the `toString` meta-method.
+
+```js
+foo = 1
+print "$foo sec => $(foo * 1000)ms"
+// prints "1 sec => 1000ms"
+```
+
+&nbsp;
+
+### Multi-Line Strings
+
+Multi-line strings must use double quotes.
+
+```c
+foo = ("
+  a b c      // comments are ignored
+")
+
+// Same as:
+bar = "a b c"
+assert(foo == bar)
+```
+
+The parentheses are **required.**
 
 &nbsp;
 
