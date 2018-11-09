@@ -427,6 +427,10 @@ foo.a = 2
 assert(foo != bar)
 assert(foo.a == 2)
 assert(bar.a == 1)
+
+// Remove a property:
+foo.a = _
+assert('a' !in foo)
 ```
 
 Function calls let you omit parentheses when an object is the only argument.
