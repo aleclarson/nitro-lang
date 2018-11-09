@@ -342,10 +342,6 @@ result = value in sequence
 
 The `sequence` is one of `Range | Array | Set | Object`.
 
-The meaning of `value` depends on the `sequence` type:
-- `Range` means `value` must be a number
-- `Array|Set` means `in` returns true when
-
 The meaning of `result == true` depends on the `sequence` type:
 - `Range` means `value` is in the given range
 - `Array|Set` means `value` is in the given array/set
