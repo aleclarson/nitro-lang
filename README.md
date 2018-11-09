@@ -406,6 +406,8 @@ typeof ^{} == "fiber"
 
 ### Objects
 
+To create an object:
+
 ```js
 foo = (a: 1, b: (c: 1))
 assert(foo.a == foo.b.c)
@@ -415,7 +417,7 @@ bar = (:foo, bar: 1)
 assert(bar.foo == foo)
 ```
 
-Objects are **copied on mutation,** but local variables always have the newest copy.
+To mutate an object:
 
 ```js
 foo = (a: 1)
