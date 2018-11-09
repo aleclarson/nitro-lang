@@ -1092,9 +1092,19 @@ foo = (a, b) {
 }
 ```
 
-Certain actions yield automatically (eg: network requests, disk I/O).
+_All functions_ are allowed to yield, because there is always an active fiber.
 
-Fibers must be resumed manually, unless created in the main fiber.
+Fibers must be resumed manually, unless yielded to the current fiber.
+
+Fibers die when there is nothing left to do. They cannot be reused.
+
+The script responsible for resuming your fiber gets to decide how to interpret the values you `yield`.
+
+The main fiber ise resumed in the following circumstances:
+- A yielded promise has resolved
+- All fibers that yielded before it have yielded again
+
+Core functions may yield their fiber (eg: network requests, disk I/O).
 
 &nbsp;
 
@@ -1112,26 +1122,36 @@ catch {
   // Catch any errors thrown by the fiber.
 }
 assert(foo)
-assert(foo is Fiber?) // Goes null after it returns.
-
-// Call a fiber to start or resume it.
-results = while foo: foo()
-assert(results ~= [ 1, _, _ ])
-
-// When a fiber returns, all references are lost.
-assert(foo == null)
+assert(foo is Fiber)
 ```
 
-Use `try ^{}` for fire-and-forget fibers:
+After creating our fiber, we want to run it. The first option is to `yield` it to whatever fiber we're on. This tells our parent fiber to manage the newly created fiber, instead of doing it ourselves.
+
+Otherwise, you can call the fiber in a loop and handle its state manually.
 
 ```js
-try ^{
-  // Whatever you yield is ignored.
-  yield 3.14
+// The easy way
+yield foo
 
-  print 'in fiber'  // this logs later
+// The flexible way
+values = while foo.next: foo.next()
+```
+
+Calling `fiber.next` in a loop is most useful when you care about what values are yielded by the fiber.
+
+You can also use `for..of` on fibers, like a Javascript generator.
+
+```js
+for value of foo {
+  // For every value yielded.
 }
-print 'after fiber' // this logs first
+// The fiber exited.
+```
+
+If you just want all yielded values in an array:
+
+```js
+values = [..foo]
 ```
 
 &nbsp;
