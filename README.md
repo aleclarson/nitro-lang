@@ -366,6 +366,14 @@ The meaning of `result == true` depends on the `sequence` type:
 'a' in (a: 1) // => true
 ```
 
+The `!in` operator does the opposite.
+
+```js
+assert(0 !in >1)
+assert(0 !in [])
+assert(0 !in ())
+```
+
 &nbsp;
 
 ### Equality operators
