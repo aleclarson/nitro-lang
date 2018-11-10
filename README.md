@@ -154,14 +154,18 @@ foo = null
 export *foo
 ```
 
-Reactive objects/arrays/sets are the only way for nested scopes to affect their parent scopes.
+By default, nested scopes cannot mutate anything in their parent scopes. When this becomes an obstacle, use a reactive variable combined with an object.
 
 ```js
-*state = (a: 1)
+*obj = (a: 1)
+*arr = []
 do {
-  state.a = 2
+  obj.a = 2
+  arr.0 = 2
 }
-assert(state.a == 2)
+// Only possible with reactive variable and an object:
+assert(obj.a == 2)
+assert(arr.0 == 2)
 ```
 
 &nbsp;
