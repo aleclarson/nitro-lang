@@ -130,9 +130,9 @@ do {
 
 &nbsp;
 
-### Reactivity
+### Reactive variables
 
-Local variables can be reactive. They always reflect the latest evaluation of their expression.
+Variables can be reactive. They always reflect the latest evaluation of their expression.
 
 ```js
 *foo = bar + 1
@@ -163,6 +163,55 @@ do {
 }
 assert(state.a == 2)
 ```
+
+&nbsp;
+
+### Global variables
+
+To ensure type safety, global variables must be statically assigned. This restriction also exists for local variables.
+
+```js
+global foo = true
+foo // => true
+```
+
+Local variables override (but not overwrite) global variables.
+
+```js
+foo = false
+global foo = true
+
+foo // => false
+global.foo // => true
+```
+
+Global variables can be reactive.
+
+```js
+// Depend on any reactive variables used inside `bar`
+global *foo = bar()
+```
+
+Global variables cannot be declared in a nested scope.
+
+```js
+// OK
+global foo = true
+
+// OK
+global bar = foo ? 1 : 0
+
+// BAD
+if something {
+  global jQuery = null
+}
+```
+
+Global variables cannot be mutated or redeclared.
+
+Global naming collisions are compiler errors.
+
+Global variables are only visible to modules that directly import them, have a direct dependency that imports them, or have an indirect dependency that imports them.
 
 &nbsp;
 
