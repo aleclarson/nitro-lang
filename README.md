@@ -179,7 +179,7 @@ global foo = true
 foo // => true
 ```
 
-Local variables override (but not overwrite) global variables.
+Local variables will shadow any global variable with the same name.
 
 ```js
 foo = false
