@@ -495,14 +495,14 @@ log(a: 1, b: 2)
 log((a: 1), (b: 2))
 ```
 
-You can call an object to shallow merge other objects.
+You can call an object to set multiple properties at once.
 
 ```js
-obj = (a: 1, b: (c: 1))
-obj(a: 2, b: (), c: 2)
+obj = (a: 1, b?: (c: 1), c?: _ as number)
+obj(a: 2, b: (c: 2), c: 2)
 
 assert(obj.a == 2)
-assert(obj.b.c == _)
+assert(obj.b.c == 2)
 assert(obj.c == 2)
 ```
 
