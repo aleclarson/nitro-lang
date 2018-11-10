@@ -518,6 +518,25 @@ assert(obj.method)
 
 &nbsp;
 
+#### Computed properties
+
+Object properties can be reactive.
+
+```js
+foo = 0
+obj = (
+  foo: *(foo + 1),
+)
+
+assert(obj.foo == 1)
+foo += 1
+assert(obj.foo == 2)
+```
+
+Getters and setters as you know them from Javascript are _not_ supported.
+
+&nbsp;
+
 ### Arrays
 
 Arrays are immutable, ordered collections.
