@@ -628,6 +628,31 @@ array = [
 ]
 ```
 
+Positive, whole indices have a shorthand syntax:
+
+```js
+// GOOD
+array.0     // get the first value
+array.0 = 1 // set the first value
+array.0 = _ // delete the first value
+array.1 = 2 // set the second value (and so on)
+
+// BAD
+array.1.2   // too ambiguous!
+```
+
+The last indice gets its own shorthand syntax:
+
+```js
+// GOOD
+array.$
+array.$ = 1
+array.$ = _
+
+// BAD
+array.$.2
+```
+
 &nbsp;
 
 ### Length operator
