@@ -1381,24 +1381,6 @@ test(1)
 
 &nbsp;
 
-### Imports
-
-```js
-// Import parts of a module.
-import (a, b, c) from './path/to/module'
-
-// Import all of a module.
-import foo from './path/to/module'
-
-// Do both at once.
-import foo, (a, b, c) from './path/to/module'
-
-// Reactive variables must be marked as such.
-import (*foo) from './path/to/module'
-```
-
-&nbsp;
-
 ### Exports
 
 When the `export` keyword is first used with an object literal, that object is used to hold all future exports. All other object literals are merged into it. Pass anything else to override the current exports.
@@ -1422,6 +1404,73 @@ log(foo) // => 2
 
 // Export a reactive variable
 export *bar = foo + 1
+```
+
+&nbsp;
+
+### Imports
+
+```js
+// Import parts of a module.
+import (a, b, c) from './path/to/module'
+
+// Import all of a module.
+import foo from './path/to/module'
+
+// Do both at once.
+import foo, (a, b, c) from './path/to/module'
+
+// Reactive variables must be marked as such.
+import (*foo) from './path/to/module'
+```
+
+&nbsp;
+
+### Import resolution
+
+Only `.nt` extensions are currently supported.
+
+When no extension is defined, `.nt` is assumed.
+
+Import paths can be:
+- dependency names
+- relative paths to modules in the same package
+- http modules
+- ftp modules
+
+&nbsp;
+
+### `nitro.yml`
+
+Every nitro package has a `nitro.json` or `nitro.yml` manifest. It's almost identical to `package.json` in the node.js universe.
+
+```yml
+name: lodash
+version: 1.0.0
+dependencies:
+  foo: ^1.0.0
+```
+
+Package names must:
+- be lowercase
+- start with a number or letter
+- use a dash or dot between words (and never 2 or more in a row)
+
+The `fetch` function can be used to read `.yaml`, `.yml`, or `.json` files and parse them before returning. In fact, the `fetch` function can be extended by anyone to handle new file types.
+
+```js
+// This yields the fiber so other work can be done while we wait.
+meta = fetch './nitro.yml'
+
+assert(meta is object)
+assert(meta.name == 'lodash')
+
+if deps = meta.dependencies {
+  assert(deps is object)
+  assert(deps.foo == '^1.0.0')
+} else {
+  throw 'Must have dependencies'
+}
 ```
 
 &nbsp;
