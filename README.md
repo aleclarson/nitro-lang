@@ -79,8 +79,11 @@ Inline comments only
 ### Logging
 
 ```js
-print 'hello world'
-print(foo)
+log 'hello world'
+log(foo)
+
+// Log an error string or object via stderr
+log.error(Error('wtf'))
 ```
 
 &nbsp;
@@ -102,11 +105,11 @@ a = 1
 do {
   a = 2
   b = 2
-  print(a) // 2
-  print(b) // 2
+  log(a) // 2
+  log(b) // 2
 }
-print(a) // 1
-print(b) // error: 'b' was never declared
+log(a) // 1
+log(b) // error: 'b' was never declared
 ```
 
 Conditional overrides affect the variable type:
@@ -198,7 +201,7 @@ Static strings are the most efficient string. They have no support for interpola
 The syntax for joining two strings is familiar to most web developers:
 
 ```js
-print 'a' + "b"
+log 'a' + "b"
 // prints "ab"
 ```
 
@@ -216,7 +219,7 @@ Both syntaxes coerce the value to a string by calling the `toString` meta-method
 
 ```js
 foo = 1
-print "$foo sec => $(foo * 1000)ms"
+log "$foo sec => $(foo * 1000)ms"
 // prints "1 sec => 1000ms"
 ```
 
@@ -433,10 +436,10 @@ Function calls let you omit parentheses when an object is the only argument.
 
 ```js
 // 1 argument
-print(a: 1, b: 2)
+log(a: 1, b: 2)
 
 // 2+ arguments
-print((a: 1), (b: 2))
+log((a: 1), (b: 2))
 ```
 
 You can call an object to shallow merge other objects.
@@ -772,7 +775,7 @@ catch(e: Error) {
 }
 // To catch non-errors, you must use explicit types:
 catch(value: any) {
-  print(value)
+  log(value)
 }
 ```
 
@@ -800,15 +803,15 @@ Of course, `break` and `continue` exist.
 
 ```js
 // for..of (one-liner)
-for value of [1, 2, 3]: print(value)
+for value of [1, 2, 3]: log(value)
 
 // for..of
 for value of [1, 2, 3] {
-  print(value)
+  log(value)
 }
 
 // for..in (one-liner)
-for i in 1..3: print(i)
+for i in 1..3: log(i)
 
 // for..in (with object)
 for key in obj {
@@ -828,7 +831,7 @@ for (index, value) in array {
 
 // for..in (with types)
 for (key: id) in (a: 1, b: 2) {
-  print(key)
+  log(key)
 }
 
 // while (one-liner)
@@ -938,12 +941,12 @@ You can use object/array/set destructuring inside the parameter list:
 ```js
 // An object
 Point = ((x, y): (x: number, y: number)) {
-  print(:x, :y)
+  log(:x, :y)
 }
 
 // An array
 Point = ([x, y]: [number, number]) {
-  print(:x, :y)
+  log(:x, :y)
 }
 
 // Both in one function
@@ -951,7 +954,7 @@ Component = (
   [a, b, c]: [any, any, any],
   (x, y, z): (x: number, y: number, z: number),
 ) {
-  print(:a, :b, :c, :x, :y, :z)
+  log(:a, :b, :c, :x, :y, :z)
 }
 ```
 
@@ -1358,7 +1361,7 @@ export 1 + 1
 
 // Export a constant
 export foo = 1 + 1
-print(foo) // => 2
+log(foo) // => 2
 
 // Export a reactive variable
 export *bar = foo + 1
