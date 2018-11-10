@@ -529,6 +529,8 @@ obj = (
 )
 ```
 
+Getters and setters as you know them from Javascript are _not_ supported.
+
 &nbsp;
 
 #### Private keys
@@ -570,9 +572,9 @@ assert(obj.method)
 
 &nbsp;
 
-#### Computed properties
+#### Reactive objects
 
-Object properties can be reactive.
+An object property can wrap its value in `*()` to become reactive.
 
 ```js
 foo = 0
@@ -585,7 +587,13 @@ foo += 1
 assert(obj.foo == 2)
 ```
 
-Getters and setters as you know them from Javascript are _not_ supported.
+An entire object is reactive when declared like this:
+
+```js
+obj = *(foo: 1)
+```
+
+Reactive objects cannot be mutated.
 
 &nbsp;
 
