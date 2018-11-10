@@ -477,25 +477,43 @@ obj = (
 )
 ```
 
+&nbsp;
+
 #### Private keys
 
-Object keys that begin with `_` are private.
+Object keys prefixed like `_ foo: 1` are private.
 
-"Private" affects the following:
-- IntelliSense hides private keys
-- Compiler prohibits third parties from:
-  - accessing private keys
-  - setting private keys
+Private keys are neither readable or writable from outside the module.
+
+Private keys are never shown via IntelliSense (outside the module).
+
+```js
+obj = (
+  _ a: true,
+  _ 1: true,
+  _ [var]: () => _,
+  _ method() {},
+)
+
+obj.a      // => true
+'a' in obj // => true
+```
+
+Both `_ foo` and `_foo` create a private key, but with different names.
 
 ```js
 obj = (
   _a: true,
-  _1: true,
+  _method() {},
+  _ method() {},
 )
 
-obj._a // => true
-obj._a = false
-obj._a // => false
+obj._a      // => true
+'_a' in obj // => true
+
+// Both private, different name
+assert(obj._method)
+assert(obj.method)
 ```
 
 &nbsp;
