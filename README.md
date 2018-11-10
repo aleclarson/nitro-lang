@@ -601,6 +601,30 @@ Reactive objects cannot be mutated.
 
 &nbsp;
 
+### Inheritance
+
+When used between objects, the `&` operator copies the preceding object and extends it with new methods and properties.
+
+Think of it as a shallow merge that mutates the object type.
+
+```js
+// First, let's make a simple object factory.
+Foo = (a, b) => {
+  (:a, :b, sum() { this.a + this.b })
+}
+
+foo = Foo(1, 1)
+foo.sum() // => 2
+
+// `foo &=` and `foo = foo &` are the same
+foo &= (c: 1, sum() { &sum() + this.c })
+foo.sum() // => 3
+```
+
+The `&sum()` part is calling the `sum` method declared inside `Foo` as its own method. This is possible for any overridden function.
+
+&nbsp;
+
 ### Arrays
 
 Arrays are immutable, ordered collections.
