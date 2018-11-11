@@ -1352,6 +1352,38 @@ values = [..foo]
 
 &nbsp;
 
+### Fiber blocks
+
+Any code block can be converted to a fiber with a single character.
+
+Like if statements:
+
+```js
+if cond ^{
+  // This fiber is resumed by the main fiber.
+}
+```
+
+And for loops:
+
+```js
+// Execute iterations concurrently.
+for foo in bar ^{
+  // This fiber is resumed by the main fiber.
+}
+```
+
+Never confuse `for x in y ^{}` with `for x in y: ^{}`. The latter creates a
+fiber for _every_ `x` in `y`.
+
+```js
+for foo in bar: ^{
+  // These fibers _must_ be yielded or managed manually.
+}
+```
+
+&nbsp;
+
 ### Sets
 
 Sets are arrays with transparent deduplication.
