@@ -75,6 +75,8 @@ render(
 )
 ```
 
+No `.ntx` extension is required, because JSX is baked into Nitro.
+
 In the future, the stdlib will have useful primitives for creating your own React-like library. This will provide maximum interoperability between component-based frameworks.
 
 &nbsp;
