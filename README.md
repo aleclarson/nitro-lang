@@ -2,21 +2,34 @@
 
 Enjoy a language that embraces: **simplicity, immutability, and reactivity**
 
-Nitro apps run anywhere by compiling to [WASM](https://webassembly.org/).
+Nitro apps run anywhere by compiling to [WebAssembly][wasm].
 
+- **Project status:** Planning
 - **File extension:** `.nt`
 - **Strongly typed?** Yes, with [type inference](https://en.wikipedia.org/wiki/Type_inference)
-- **Compiles to:** `.wasm`
+- **Compiles to:** [`.wasm`][wasm]
 - **Inspired by:** [TypeScript][ts], JavaScript, [CoffeeScript][coffee], [Lua][lua], C, [Ghost][ghost]
 
+[wasm]: https://webassembly.org
+[walt]: https://github.com/ballercat/walt
 [coffee]: https://github.com/jashkenas/coffeescript
 [ghost]: https://github.com/jamiebuilds/ghost-lang
 [lua]: https://en.wikipedia.org/wiki/Lua_(programming_language)
 [ts]: https://github.com/Microsoft/TypeScript
+[ast]: https://en.wikipedia.org/wiki/Abstract_syntax_tree
 
 &nbsp;
 
-> ### ⚠️ **NITRO IS JUST A CONCEPT LANGUAGE.** Help us make it!
+### Packages
+
+Nitro splits concerns across many packages.
+
+- [nitro-lex](/packages/nitro-lex): Convert raw Nitro code into a
+  "pull stream" of syntax tokens
+- [nitro-ast](/packages/nitro-ast): Convert syntax tokens into [AST][ast] nodes
+- [nitro-lint](/packages/nitro-lint): Type-check, lint, and format `.nt` modules
+- [nitro-eval](/packages/nitro-eval): Interpret `.nt` modules on-the-fly (written in TypeScript)
+- [nitro-walt](/packages/nitro-walt): Compile `.nt` modules to [`.wasm`][wasm] by first compiling to [`.walt`][walt]
 
 &nbsp;
 
