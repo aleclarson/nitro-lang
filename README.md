@@ -1016,6 +1016,18 @@ add = (a: number, b: number): number { a + b }
 assert(add is (a: number, b: number) => number)
 ```
 
+Functions can be overloaded, which means they have multiple call signatures. Which function is used by any given callsite is determined by specificity. Rest parameters are always the last resort.
+
+```js
+// GOOD
+foo = () { 1 }
+foo = (a: number) { 2 }
+foo = (a: number, b: number) { 3 }
+
+// BAD
+foo = (a?: number) {}
+```
+
 Nitro uses ["tail call optimization"](https://www.lua.org/pil/6.3.html) to let recursive functions avoid call stack overflows. This makes recursive functions as equally powerful as `for` loops, etc.
 
 &nbsp;
