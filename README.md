@@ -105,6 +105,8 @@ log.error(Error('wtf'))
 
 ### Variables
 
+Variable names may contain letters and numbers, but must start with a letter. No special characters are allowed.
+
 ```js
 // Declare your first variable:
 a = 1
