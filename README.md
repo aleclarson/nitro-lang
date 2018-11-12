@@ -604,15 +604,12 @@ obj = (
 assert(obj.foo == 1)
 foo += 1
 assert(obj.foo == 2)
+
+// Add a reactive property
+obj.bar = *(obj.foo)
 ```
 
-An entire object is reactive when declared like this:
-
-```js
-obj = *(foo: 1)
-```
-
-Reactive objects cannot be mutated.
+Fully reactive objects are not supported.
 
 &nbsp;
 
