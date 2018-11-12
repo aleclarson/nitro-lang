@@ -1016,6 +1016,8 @@ add = (a: number, b: number): number { a + b }
 assert(add is (a: number, b: number) => number)
 ```
 
+Nitro uses ["tail call optimization"](https://www.lua.org/pil/6.3.html) to let recursive functions avoid call stack overflows. This makes recursive functions as equally powerful as `for` loops, etc.
+
 &nbsp;
 
 #### Implicit returns
