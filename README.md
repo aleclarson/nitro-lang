@@ -1,4 +1,4 @@
-# nitro-lang
+<a href="#readme"><img src="/nitro@3x.png" width="250"/></a>
 
 Enjoy a language that embraces: **simplicity, immutability, and reactivity**
 
