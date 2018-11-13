@@ -1112,12 +1112,12 @@ foo(0, 2) // => 2
 
 &nbsp;
 
-### Rest arguments
+### Rest parameters
 
 Just like with destructuring, the rest operator can appear anywhere in the argument list.
 
 ```js
-foo = (a, ..b: number[]) => b
+foo = (_, ..b: number[]) => b
 
 foo(1, 2, 3) // => [2, 3]
 ```
