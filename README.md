@@ -1391,9 +1391,63 @@ fiber for _every_ `x` in `y`.
 
 ```js
 for foo in bar: ^{
-  // These fibers _must_ be yielded or managed manually.
+  // These fibers are _not_ managed auto-magically.
 }
 ```
+
+&nbsp;
+
+### Macros
+
+Macros are function calls that are evaluated at compile-time. Sometimes, a macro
+can only be partially evaluated. Macros always expand at their callsites.
+
+Macros must be imported before being used.
+
+```js
+foo = #(a, b, c) {
+  a ? b : c
+}
+
+// When all arguments are constant, the macro evaluates to a constant.
+myConst = foo(true, 1, 0)
+
+// Otherwise, the macro is partially evaluated.
+myVar = foo(true, randInt(), 0)
+myVar = foo(randInt(), 1, 0)
+```
+
+The above snippet is compiled to:
+
+```js
+myConst = 1
+
+// The macro was only expanded.
+myVar = randInt() ? 1 : 0
+
+// The ternary expression was optimized out.
+myVar = randInt()
+```
+
+Macros can declare "private variables" that are randomly named (and optimized out when possible).
+
+```js
+foo = #(a, b) {
+  // Without the #, this variable would leak if it can't be optimized out.
+  #foo = a > 0
+  foo ? 1 : 0
+}
+
+bar = foo(1)
+bar = foo(randInt())
+
+// ..becomes..
+
+bar = 0
+bar = randInt() > 0 ? 1 : 0
+```
+
+Macros can be used by other macros, making them composable.
 
 &nbsp;
 
